@@ -1,0 +1,13 @@
+*{
+    padding: 0px;
+    margin: 0px;
+}
+canvas{
+    border: 1px solid black;  
+} 
+.container{
+    width: 50%;
+    background-color: aqua;
+    margin-left: 25%;
+    align-content: center;
+}
