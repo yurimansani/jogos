@@ -1,138 +1,143 @@
-//   C = Cima
-//   D = Direita
-//   B = Baixo
-//   E = Esquerda
-// 
-const direcoes = ['C','D','B','E'];
-
-let tamanhoCobrinhaX = 10;
-let tamanhoCobrinhaY = 10;
-
-function calculaProximaPosicao(x,y,d){
-    switch (d) {
-        case 'C':
-            y = y - 10;
-            break;
-    
-        case 'B':
-            y = y + 10;
-            break;
-
-        case 'D':
-            x = x + 10;
-            break;
-
-        case 'E':
-            x = x - 10;
-            break;
-            
-        default:
-            break;
+// Directions
+const directions = {
+    UP: 'UP',
+    RIGHT: 'RIGHT',
+    DOWN: 'DOWN',
+    LEFT: 'LEFT',
+  };
+  
+  // Constants
+  const BLOCK_SIZE = 10;
+  const CANVAS_WIDTH = 800;
+  const CANVAS_HEIGHT = 500;
+  const SNAKE_COLOR = '#FF0000';
+  const FOOD_COLOR = '#2d56a7';
+  
+  // Elements
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  
+  // Variables
+  let snake = [
+    { x: 100, y: 250 },
+    { x: 90, y: 250 },
+    { x: 80, y: 250 },
+  ];
+  let food = generateFoodPosition();
+  let direction = directions.RIGHT;
+  let score = 0;
+  
+  // Functions
+  function generateFoodPosition() {
+    const x = Math.floor(Math.random() * (CANVAS_WIDTH / BLOCK_SIZE)) * BLOCK_SIZE;
+    const y = Math.floor(Math.random() * (CANVAS_HEIGHT / BLOCK_SIZE)) * BLOCK_SIZE;
+    return { x, y };
+  }
+  
+  function drawBlock(x, y, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+  }
+  
+  function drawSnake() {
+    snake.forEach((block) => drawBlock(block.x, block.y, SNAKE_COLOR));
+  }
+  
+  function moveSnake() {
+    const head = { x: snake[0].x, y: snake[0].y };
+    switch (direction) {
+      case directions.UP:
+        head.y -= BLOCK_SIZE;
+        break;
+      case directions.DOWN:
+        head.y += BLOCK_SIZE;
+        break;
+      case directions.RIGHT:
+        head.x += BLOCK_SIZE;
+        break;
+      case directions.LEFT:
+        head.x -= BLOCK_SIZE;
+        break;
     }
-
-    let obj = {
-        x:x,
-        y:y
-    };
-
-    return obj;
-
-}
-function geraUmDoce (canvasGame) {
-    let ctx = canvasGame.getContext("2d");
-    ctx.fillStyle = '#2d56a7';
-    let coordX= Math.floor(Math.random() * (80 - 1) + 1) * 10;
-    let coordY = Math.floor(Math.random() * (50 - 1) + 1) * 10;
-    ctx.fillRect((coordX),(coordY),tamanhoCobrinhaX,tamanhoCobrinhaY);
-    return {
-        x:coordX,
-        y:coordY
-    };
-}
-
-function detectaColisao(obj1,obj2) {
-    if (obj1.x < obj2.x + tamanhoCobrinhaX &&
-        obj1.x + tamanhoCobrinhaX > obj2.x &&
-        obj1.y < obj2.y + tamanhoCobrinhaY &&
-        obj1.y + tamanhoCobrinhaY > obj2.y) {
-        return true
+    snake.unshift(head);
+    if (head.x === food.x && head.y === food.y) {
+      food = generateFoodPosition();
+      score += 1;
+    } else {
+      snake.pop();
+    }
+  }
+  
+  function changeDirection(newDirection) {
+    if (
+      (direction === directions.UP && newDirection === directions.DOWN) ||
+      (direction === directions.DOWN && newDirection === directions.UP) ||
+      (direction === directions.RIGHT && newDirection === directions.LEFT) ||
+      (direction === directions.LEFT && newDirection === directions.RIGHT)
+    ) {
+      return;
+    }
+    direction = newDirection;
+  }
+  
+  function detectCollision() {
+    const head = snake[0];
+    if (
+      head.x < 0 ||
+      head.x >= CANVAS_WIDTH ||
+      head.y < 0 ||
+      head.y >= CANVAS_HEIGHT ||
+      snake.slice(1).some((block) => block.x === head.x && block.y === head.y)
+    ) {
+      return true;
     }
     return false;
-}
-let canvasGame = document.getElementById("game");
-let limiteX = canvasGame.width;
-let limiteY = canvasGame.height;
-let ctx = canvasGame.getContext("2d");
-
-// velocidade
-let v = 100;
-//posisao inicial
-let x = 400;
-let y = 250;
-let d = 'D';
-// TAMANHO
-let T = 1;
-// COR DA COBRINHA
-let cor = "#FF0000";
-ctx.fillStyle = cor;
-// ctx.fillRect(0,tamanhoCobrinhaX,tamanhoCobrinhaY);
-
-let posicaoDoceGlobal = geraUmDoce(canvasGame);
-
-document.onkeydown = function(e) {
-    
-    if (e.key == 'ArrowUp' || e.key == 'w') {
-        d = 'C';
-        // up arrow
+  }
+  
+  function displayScore() {
+    const scoreElement = document.getElementById('score');
+    scoreElement.innerHTML = `Placar: ${score}`;
+  }
+  
+  function render() {
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    drawSnake();
+    drawBlock(food.x, food.y, FOOD_COLOR);
+    displayScore();
+  }
+  
+  function gameLoop() {
+    if (detectCollision()) {
+      clearInterval(gameId);
+      alert(`Perdeu playboy! seu placar: ${score}.`);
+      location.reload();
+      return;
     }
-    else if ((e.key == 'ArrowDown' || e.key == 's')) {
-        d = 'B';
-        // down arrow
+    moveSnake();
+    render();
+  }
+  
+  // Event listeners
+  document.addEventListener('keydown', (event) => {
+    switch (event.key) {
+      case 'ArrowUp': 
+      case 'w':
+        changeDirection(directions.UP);
+        break;
+      case 'ArrowDown':
+      case 's':
+        changeDirection(directions.DOWN);
+        break;
+      case 'ArrowRight':
+      case 'd':
+        changeDirection(directions.RIGHT);
+        break;
+      case 'ArrowLeft':
+      case 'a':
+        changeDirection(directions.LEFT);
+        break;
     }
-    else if ((e.key == 'ArrowLeft' || e.key == 'a')) {
-        d = 'E';
-        // left arrow
-    }
-    else if (e.key == 'ArrowRight' || e.key == 'd') {
-        d = 'D';
-        // right arrow
-    }
-};
-
-let gameId = setInterval(()=>{
-    let proximaPosicao = calculaProximaPosicao(x,y,d)
-    let posicaoAnterior = {};
-    posicaoAnterior.x = x;
-    posicaoAnterior.y = y;
-    if (detectaColisao(proximaPosicao,posicaoDoceGlobal)) {
-        T++;
-        posicaoDoceGlobal = geraUmDoce(canvasGame);
-    }
-    x = proximaPosicao.x;
-    y = proximaPosicao.y;
-
-    if (x < 0 || x >= limiteX) {
-        gameOver()
-        console.log(x)
-    }
-    if (y< 0 || y >= limiteY) {
-        console.log(y)
-        gameOver()
-    }
-    
-    ctx.fillStyle = cor;
-    ctx.fillRect(x,y,tamanhoCobrinhaX,tamanhoCobrinhaY);
-    ctx.clearRect(posicaoAnterior.x, posicaoAnterior.y, tamanhoCobrinhaX, tamanhoCobrinhaY)
-    
-}, v);
-function gameOver() {
-    clearTimeout(gameId);
-    // alert('GAME OVER!!');
-    location.reload();
-    
-}
-
-
-
-
-
+  });
+  
+  // Start the game
+  const gameId = setInterval(gameLoop, 100);
