@@ -140,4 +140,4 @@ const directions = {
   });
   
   // Start the game
-  const gameId = setInterval(gameLoop, 100);
+  const gameId = setInterval(gameLoop, 80);
