@@ -25,6 +25,7 @@ const directions = {
   ];
   let food = generateFoodPosition();
   let direction = directions.RIGHT;
+  let newDirection = directions.RIGHT;
   let score = 0;
   
   // Functions
@@ -45,6 +46,10 @@ const directions = {
   
   function moveSnake() {
     const head = { x: snake[0].x, y: snake[0].y };
+    if (newDirection !==direction) {
+        
+        direction = newDirection;
+    }
     switch (direction) {
       case directions.UP:
         head.y -= BLOCK_SIZE;
@@ -68,7 +73,7 @@ const directions = {
     }
   }
   
-  function changeDirection(newDirection) {
+  function changeDirection(commandNewDirection) {
     if (
       (direction === directions.UP && newDirection === directions.DOWN) ||
       (direction === directions.DOWN && newDirection === directions.UP) ||
@@ -77,7 +82,7 @@ const directions = {
     ) {
       return;
     }
-    direction = newDirection;
+    newDirection = commandNewDirection;
   }
   
   function detectCollision() {
