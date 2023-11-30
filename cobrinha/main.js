@@ -80,6 +80,7 @@ const directions = {
       (direction === directions.RIGHT && newDirection === directions.LEFT) ||
       (direction === directions.LEFT && newDirection === directions.RIGHT)
     ) {
+      newDirection = direction;
       return;
     }
     newDirection = commandNewDirection;
